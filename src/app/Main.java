@@ -49,7 +49,8 @@ public class Main {
             switch (opcion) {
                 case 1 -> registrarEntrada();
                 case 2 -> registrarSalida();
-                case 3, 4 -> System.out.println("Esta opción se habilita en un commit posterior.");
+                case 3 -> reporteOcupacion();
+                case 4 -> reporteFinanciero();
                 case 5 -> System.out.println("Hasta luego.");
             }
         } while (opcion != 5);
@@ -280,6 +281,25 @@ public class Main {
         }
         System.out.println("TOTAL A PAGAR: $" + total);
         System.out.println("=============================");
+    }
+
+    static void reporteOcupacion() {
+        System.out.println("");
+        System.out.println("===== REPORTE DE OCUPACIÓN =====");
+        System.out.println("Celdas ocupadas: " + celdasOcupadas);
+        System.out.println("Celdas libres: " + celdasLibres);
+        System.out.println("================================");
+    }
+
+    static void reporteFinanciero() {
+        long totalGeneral = recaudoCarros + recaudoMotos;
+
+        System.out.println("");
+        System.out.println("===== REPORTE FINANCIERO =====");
+        System.out.println("Total recaudado por carros: $" + recaudoCarros);
+        System.out.println("Total recaudado por motos: $" + recaudoMotos);
+        System.out.println("Total general recaudado: $" + totalGeneral);
+        System.out.println("==============================");
     }
 
     static long contarDiasCompletos(LocalDateTime ingreso, LocalDateTime salida) {
