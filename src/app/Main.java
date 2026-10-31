@@ -1,6 +1,7 @@
 package app;
 
 import javax.swing.plaf.synth.SynthTextAreaUI;
+import java.security.DrbgParameters;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.Duration;
@@ -11,6 +12,7 @@ public class Main {
 
     static int CAPACIDAD_TOTAL= 10;
     static int HORA_CIERRE = 22;
+    static final int SIN_CELDA = -1;
     static int HORA_APERTURA = 8;
     static int UMBRAL_HORAS_DIA = 8;
     static int TARIFA_HORA_CARRO = 4000;
@@ -41,9 +43,9 @@ public class Main {
         System.out.println("     SISTEMA DE PARQUEADERO");
         mostrarMenu();
         System.out.println("Menú en construcción.");
-
-        registrarEntrada();
-
+        for (int i= 0; i < CAPACIDAD_TOTAL + 1; i++) {
+            registrarEntrada();
+        }
         SCANNER.close();
     }
 
@@ -73,7 +75,7 @@ public class Main {
 
     static void registrarEntrada() {
         int posicion = celdaDisponible();
-        if (posicion == -1) {
+        if (posicion == SIN_CELDA) {
             System.out.println("El parqueadero está lleno. No se puede registrar el ingreso.");
             return;
         }
@@ -101,7 +103,7 @@ public class Main {
                 return i;
             }
         }
-        return -1;
+        return SIN_CELDA;
     }
 
     static String leerTipoVehiculo() {
