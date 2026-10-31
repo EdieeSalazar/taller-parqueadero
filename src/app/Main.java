@@ -48,7 +48,8 @@ public class Main {
             opcion = leerOpcion();
             switch (opcion) {
                 case 1 -> registrarEntrada();
-                case 2, 3, 4 -> System.out.println("Esta opción se habilita en un commit posterior.");
+                case 2 -> registrarSalida();
+                case 3, 4 -> System.out.println("Esta opción se habilita en un commit posterior.");
                 case 5 -> System.out.println("Hasta luego.");
             }
         } while (opcion != 5);
@@ -102,6 +103,41 @@ public class Main {
         System.out.println("Vehículo registrado en la celda " + (posicion + 1) + ".");
     }
 
+    static void registrarSalida() {
+        int posicion = leerPosicion() - 1;
+
+        if (tipoVehiculo[posicion] == null) {
+            System.out.println("La celda " + (posicion + 1) + " está libre. No hay vehículo para liquidar.");
+            return;
+        }
+
+        LocalDateTime ingreso = fechaIngreso[posicion];
+        LocalDateTime salida = leerFechaHora("Fecha y hora de salida (yyyy-MM-dd HH:mm): ");
+        while (salida.isBefore(ingreso)) {
+            System.out.println("La salida no puede ser anterior al ingreso ("
+                    + ingreso.format(FORMATO_FECHA_HORA) + ").");
+            salida = leerFechaHora("Fecha y hora de salida (yyyy-MM-dd HH:mm): ");
+        }
+
+        String tipo = tipoVehiculo[posicion];
+        long valor = liquidar(posicion, salida);
+
+        if (tipo.equals(TIPO_CARRO)) {
+            recaudoCarros += valor;
+        } else {
+            recaudoMotos += valor;
+        }
+
+        tipoVehiculo[posicion] = null;
+        fechaIngreso[posicion] = null;
+        celdasOcupadas--;
+        celdasLibres++;
+    }
+
+    static long liquidar(int posicion, LocalDateTime salida) {
+        System.out.println("Liquidación pendiente de implementar.");
+        return 0;
+    }
 
     static int celdaDisponible() {
         for (int i = 0; i < CAPACIDAD_TOTAL; i++) {
@@ -146,7 +182,7 @@ public class Main {
             System.out.print(mensaje);
             String texto = SCANNER.nextLine().trim();
             if (!formatoFechaHoraValido(texto)) {
-                imprimir("Fecha u hora inválidas. Use yyyy-MM-dd HH:mm y el horario "
+                System.out.println("Fecha u hora inválidas. Use yyyy-MM-dd HH:mm y el horario "
                         + HORA_APERTURA + ":00-" + HORA_CIERRE + ":00.");
                 continue;
             }
