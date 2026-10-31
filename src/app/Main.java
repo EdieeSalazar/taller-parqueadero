@@ -134,10 +134,7 @@ public class Main {
         celdasLibres++;
     }
 
-    static long liquidar(int posicion, LocalDateTime salida) {
-        System.out.println("Liquidación pendiente de implementar.");
-        return 0;
-    }
+
 
     static int celdaDisponible() {
         for (int i = 0; i < CAPACIDAD_TOTAL; i++) {
@@ -237,5 +234,65 @@ public class Main {
         }
         return valor;
     }
+
+    static long liquidar(int posicion, LocalDateTime salida) {
+        LocalDateTime ingreso = fechaIngreso[posicion];
+        String tipo = tipoVehiculo[posicion];
+
+        long diasACobrar = contarDiasCompletos(ingreso, salida);
+        LocalDateTime cursor = ingreso.plusDays(diasACobrar);
+        long horasACobrar = calcularHorasRestantes(cursor, salida);
+
+        if (horasACobrar >= UMBRAL_HORAS_DIA) {
+            diasACobrar++;
+            horasACobrar = 0;
+        }
+
+        int tarifaDia = tipo.equals(TIPO_CARRO) ? TARIFA_DIA_CARRO : TARIFA_DIA_MOTO;
+        int tarifaHora = tipo.equals(TIPO_CARRO) ? TARIFA_HORA_CARRO : TARIFA_HORA_MOTO;
+
+        long subtotalDias = diasACobrar * tarifaDia;
+        long subtotalHoras = horasACobrar * tarifaHora;
+        long total = subtotalDias + subtotalHoras;
+
+        imprimirFactura(posicion, tipo, ingreso, salida,
+                diasACobrar, tarifaDia, horasACobrar, tarifaHora, total);
+
+        return total;
+    }
+
+    static void imprimirFactura(int posicion, String tipo,
+                                LocalDateTime ingreso, LocalDateTime salida,
+                                long dias, int tarifaDia,
+                                long horas, int tarifaHora, long total) {
+        System.out.println("");
+        System.out.println("========== FACTURA ==========");
+        System.out.println("Celda liberada: " + (posicion + 1));
+        System.out.println("Tipo de vehículo: " + tipo);
+        System.out.println("Ingreso: " + ingreso.format(FORMATO_FECHA_HORA));
+        System.out.println("Salida:  " + salida.format(FORMATO_FECHA_HORA));
+        System.out.println("--------- Desglose ---------");
+        if (dias > 0) {
+            System.out.println(dias + " día(s) x $" + tarifaDia + " = $" + (dias * tarifaDia));
+        }
+        if (horas > 0) {
+            System.out.println(horas + " hora(s) x $" + tarifaHora + " = $" + (horas * tarifaHora));
+        }
+        System.out.println("TOTAL A PAGAR: $" + total);
+        System.out.println("=============================");
+    }
+
+    static long contarDiasCompletos(LocalDateTime ingreso, LocalDateTime salida) {
+        return ChronoUnit.DAYS.between(ingreso, salida);
+    }
+
+    static long calcularHorasRestantes(LocalDateTime cursor, LocalDateTime salida) {
+        long minutosRestantes = Duration.between(cursor, salida).toMinutes();
+        return (minutosRestantes + 59) / 60;
+    }
+
+
+
+
 }
 
