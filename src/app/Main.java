@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Scanner;
+import java.time.format.DateTimeParseException;
 
 public class Main {
 
@@ -41,11 +42,16 @@ public class Main {
     public static void main(String[] args) {
         inicializarArreglos();
         System.out.println("     SISTEMA DE PARQUEADERO");
-        mostrarMenu();
-        System.out.println("Menú en construcción.");
-        for (int i= 0; i < CAPACIDAD_TOTAL + 1; i++) {
-            registrarEntrada();
-        }
+        int opcion;
+        do {
+            mostrarMenu();
+            opcion = leerOpcion();
+            switch (opcion) {
+                case 1 -> registrarEntrada();
+                case 2, 3, 4 -> System.out.println("Esta opción se habilita en un commit posterior.");
+                case 5 -> System.out.println("Hasta luego.");
+            }
+        } while (opcion != 5);
         SCANNER.close();
     }
 
@@ -106,23 +112,94 @@ public class Main {
         return SIN_CELDA;
     }
 
+    static int leerEntero(String mensaje, int minimo, int maximo) {
+        while (true) {
+            System.out.print(mensaje);
+            String texto = SCANNER.nextLine().trim();
+            try {
+                int valor = Integer.parseInt(texto);
+                if (valor >= minimo && valor <= maximo) {
+                    return valor;
+                }
+            } catch (NumberFormatException e) {
+
+            }
+            System.out.println("Dato inválido. Ingrese un número entre " + minimo + " y " + maximo + ".");
+        }
+    }
+
+    static int leerOpcion() {
+        return leerEntero("Seleccione una opción: ", 1, 5);
+    }
+
     static String leerTipoVehiculo() {
-        System.out.print("Tipo de vehículo (1. Carro, 2. Moto): ");
-        String texto = SCANNER.nextLine().trim();
-        if (texto.equals("1")) {
-            return TIPO_CARRO;
-        }
-        if (texto.equals("2")) {
-            return TIPO_MOTO;
-        }
-        return null;
+        int tipo = leerEntero("Tipo de vehículo (1. Carro, 2. Moto): ", 1, 2);
+        return tipo == 1 ? TIPO_CARRO : TIPO_MOTO;
+    }
+
+    static int leerPosicion() {
+        return leerEntero("Número de celda (1 a " + CAPACIDAD_TOTAL + "): ", 1, CAPACIDAD_TOTAL);
     }
 
     static LocalDateTime leerFechaHora(String mensaje) {
-        System.out.print(mensaje);
-        String texto = SCANNER.nextLine().trim();
-        return LocalDateTime.parse(texto, FORMATO_FECHA_HORA);
+        while (true) {
+            System.out.print(mensaje);
+            String texto = SCANNER.nextLine().trim();
+            if (!formatoFechaHoraValido(texto)) {
+                imprimir("Fecha u hora inválidas. Use yyyy-MM-dd HH:mm y el horario "
+                        + HORA_APERTURA + ":00-" + HORA_CIERRE + ":00.");
+                continue;
+            }
+
+            LocalDateTime fecha;
+            try {
+                fecha = LocalDateTime.parse(texto, FORMATO_FECHA_HORA);
+            } catch (DateTimeParseException e) {
+                System.out.println("Fecha u hora inválidas. Use yyyy-MM-dd HH:mm.");
+                continue;
+            }
+
+
+            if (!fecha.format(FORMATO_FECHA_HORA).equals(texto)) {
+                System.out.println("La fecha no existe en el calendario.");
+                continue;
+            }
+
+            return fecha;
+        }
     }
 
+    static boolean formatoFechaHoraValido(String texto) {
+        if (texto.length() != 16
+                || texto.charAt(4) != '-'
+                || texto.charAt(7) != '-'
+                || texto.charAt(10) != ' '
+                || texto.charAt(13) != ':') {
+            return false;
+        }
+
+        int anio = leerDigitos(texto, 0, 4);
+        int mes = leerDigitos(texto, 5, 2);
+        int dia = leerDigitos(texto, 8, 2);
+        int hora = leerDigitos(texto, 11, 2);
+        int minuto = leerDigitos(texto, 14, 2);
+
+        return anio >= 1 && mes >= 1 && mes <= 12 && dia >= 1 && dia <= 31
+                && hora >= HORA_APERTURA && hora <= HORA_CIERRE
+                && (hora != HORA_CIERRE || minuto <= 0)
+                && minuto >= 0 && minuto <= 59;
+    }
+
+    static int leerDigitos(String texto, int inicio, int cantidad) {
+        int valor = 0;
+        for (int i = inicio; i < inicio + cantidad; i++) {
+            char caracter = texto.charAt(i);
+            if (caracter < '0' || caracter > '9') {
+                return -1;
+            }
+            valor = valor * 10 + caracter - '0';
+        }
+        return valor;
+    }
 }
 
