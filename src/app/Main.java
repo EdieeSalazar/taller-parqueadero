@@ -1,5 +1,6 @@
 package app;
 
+import javax.swing.plaf.synth.SynthTextAreaUI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.Duration;
@@ -34,11 +35,15 @@ public class Main {
     static LocalDateTime[] fechaIngreso = new LocalDateTime[CAPACIDAD_TOTAL];
 
 
+
     public static void main(String[] args) {
         inicializarArreglos();
         System.out.println("     SISTEMA DE PARQUEADERO");
         mostrarMenu();
         System.out.println("Menú en construcción.");
+
+        registrarEntrada();
+
         SCANNER.close();
     }
 
@@ -64,6 +69,57 @@ public class Main {
 
     static void imprimir(String mensaje) {
         System.out.println(mensaje);
+    }
+
+    static void registrarEntrada() {
+        int posicion = celdaDisponible();
+        if (posicion == -1) {
+            System.out.println("El parqueadero está lleno. No se puede registrar el ingreso.");
+            return;
+        }
+
+        String tipo = leerTipoVehiculo();
+        if (tipo == null) {
+            System.out.println("Tipo de vehículo no válido.");
+            return;
+        }
+
+        LocalDateTime ingreso = leerFechaHora("Fecha y hora de ingreso (yyyy-MM-dd HH:mm): ");
+
+        tipoVehiculo[posicion] = tipo;
+        fechaIngreso[posicion] = ingreso;
+        celdasOcupadas++;
+        celdasLibres--;
+
+        System.out.println("Vehículo registrado en la celda " + (posicion + 1) + ".");
+    }
+
+
+    static int celdaDisponible() {
+        for (int i = 0; i < CAPACIDAD_TOTAL; i++) {
+            if (tipoVehiculo[i] == null) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    static String leerTipoVehiculo() {
+        System.out.print("Tipo de vehículo (1. Carro, 2. Moto): ");
+        String texto = SCANNER.nextLine().trim();
+        if (texto.equals("1")) {
+            return TIPO_CARRO;
+        }
+        if (texto.equals("2")) {
+            return TIPO_MOTO;
+        }
+        return null;
+    }
+
+    static LocalDateTime leerFechaHora(String mensaje) {
+        System.out.print(mensaje);
+        String texto = SCANNER.nextLine().trim();
+        return LocalDateTime.parse(texto, FORMATO_FECHA_HORA);
     }
 
 }
